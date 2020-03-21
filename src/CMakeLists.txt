@@ -4,7 +4,7 @@ add_library(starlark SHARED
   vm.c
 )
 
-set_property(TARGET starlark PROPERTY C_STANDARD_REQUIRED 11)
+set_target_properties(starlark PROPERTIES C_STANDARD_REQUIRED 11)
 target_compile_options(starlark PRIVATE -Wextra -Wall)
 
 add_executable(starlark-repl
@@ -12,4 +12,4 @@ add_executable(starlark-repl
 )
 
 target_link_libraries(starlark-repl starlark)
-set_property(TARGET starlark-repl PROPERTY OUTPUT_NAME starlark)
+set_target_properties(starlark-repl PROPERTIES OUTPUT_NAME starlark)
