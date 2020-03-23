@@ -36,7 +36,7 @@ typedef struct object_module
 typedef struct object_function
 {
   object root;
-  bytecode* code;
+  bytecode code;
 } object_function;
 
 typedef struct object_string

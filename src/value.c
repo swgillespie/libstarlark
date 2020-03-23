@@ -26,7 +26,7 @@ object_vtbl module_vtbl = {
 static void
 function_dtor(object_function* ptr)
 {
-  starlark_bytecode_free(ptr->code);
+  starlark_bytecode_free(&ptr->code);
 }
 
 static void

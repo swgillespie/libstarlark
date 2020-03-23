@@ -48,6 +48,6 @@ starlark_thread_eval(starlark_thread_t* thread,
 {
   UNUSED_PARAMETER(module);
   object_function* f = starlark_compile(thread, NULL, source);
-  starlark_bytecode_disassemble(stderr, f->code);
+  starlark_bytecode_disassemble(stderr, &f->code);
   return STARLARK_RESULT_SUCCESS;
 }

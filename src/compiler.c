@@ -7,16 +7,17 @@ struct compiler
   starlark_thread_t* thread;
   object_module* module;
   object_function* func;
+  bytecode_builder builder;
   const char* source;
 };
 
 static object_function*
 compile(compiler* compiler)
 {
-  bytecode* code = starlark_bytecode_new();
-  starlark_bytecode_append(code, OP_RETURN);
+  starlark_bytecode_builder_new(&compiler->builder);
+  starlark_bytecode_builder_append(&compiler->builder, OP_RETURN);
   compiler->func = starlark_gc_alloc_function(compiler->thread);
-  compiler->func->code = code;
+  starlark_bytecode_new(&compiler->builder, &compiler->func->code);
   return compiler->func;
 }
 
