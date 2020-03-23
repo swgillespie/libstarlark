@@ -5,6 +5,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+typedef enum opcode
+{
+#define OPCODE(num, mnemonic, stack_behavior) OP_##mnemonic = num
+#include "opcodes.h"
+} opcode;
+
 typedef struct bytecode
 {
   uint16_t count;

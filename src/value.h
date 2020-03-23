@@ -17,12 +17,15 @@ typedef struct object
 } object;
 
 typedef void (*destructor)(object*);
+typedef void (*tracefn)(object*, void (*)(object**));
 
 typedef struct object_vtbl
 {
   size_t size;
   bool finalizable;
+  bool contains_pointers;
   destructor dtor;
+  tracefn trace_pointers;
 } object_vtbl;
 
 typedef struct object_module
@@ -36,8 +39,16 @@ typedef struct object_function
   bytecode* code;
 } object_function;
 
+typedef struct object_string
+{
+  object root;
+  size_t length;
+  char* contents;
+} object_string;
+
 extern object_vtbl module_vtbl;
 extern object_vtbl function_vtbl;
+extern object_vtbl string_vtbl;
 
 static inline size_t
 starlark_object_size(object* ptr)
@@ -60,5 +71,8 @@ starlark_object_finalize(object* ptr)
   INVARIANT(starlark_object_is_finalizable(ptr));
   ptr->vtbl->dtor(ptr);
 }
+
+#define AS_OBJ(ptr) ((object*)(ptr))
+#define AS_OBJ_REF(ptr) ((object**)(&ptr))
 
 #endif // __STARLARK_VALUE_H__

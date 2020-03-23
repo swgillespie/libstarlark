@@ -1,4 +1,5 @@
 add_library(starlark SHARED
+  compiler.c
   gc.c
   vm.c
   bytecode.c

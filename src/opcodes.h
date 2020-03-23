@@ -3,3 +3,5 @@
 #endif // OPCODE
 
 OPCODE(0, RETURN, 1)
+
+#undef OPCODE
