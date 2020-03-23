@@ -78,3 +78,10 @@ starlark_gc_thread_heap_new(void)
   heap->top = default_segment->data + default_segment->size;
   return heap;
 }
+
+void
+starlark_gc_thread_heap_free(thread_heap* heap)
+{
+  free(heap->fromspace);
+  free(heap);
+}

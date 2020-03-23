@@ -4,6 +4,11 @@
 
 static const size_t initial_size = 10;
 
+static const char* mnemonics[] = {
+#define OPCODE(num, mnemonic, stack) #mnemonic,
+#include "opcodes.h"
+};
+
 bytecode*
 starlark_bytecode_new(void)
 {
@@ -42,4 +47,12 @@ starlark_bytecode_append(bytecode* code, uint8_t data)
 
   assert(code->count < code->capacity);
   code->code[code->count++] = data;
+}
+
+void
+starlark_bytecode_disassemble(FILE* stream, bytecode* code)
+{
+  for (int i = 0; i < code->count; i++) {
+    fprintf(stream, "%d: %s\n", i, mnemonics[code->code[code->count]]);
+  }
 }

@@ -1,8 +1,12 @@
 #include <stdbool.h>
 #include <stdlib.h>
 
+#include "bytecode.h"
+#include "compiler.h"
+#include "gc.h"
 #include "starlark.h"
 #include "util.h"
+#include "value.h"
 #include "vm.h"
 
 starlark_vm_t*
@@ -26,12 +30,14 @@ starlark_thread_new(starlark_vm_t* vm)
   }
 
   ctx->vm = vm;
+  ctx->heap = starlark_gc_thread_heap_new();
   return ctx;
 }
 
 void
 starlark_thread_free(starlark_thread_t* thread)
 {
+  starlark_gc_thread_heap_free(thread->heap);
   free(thread);
 }
 
@@ -40,8 +46,8 @@ starlark_thread_eval(starlark_thread_t* thread,
                      const char* module,
                      const char* source)
 {
-  UNUSED_PARAMETER(thread);
   UNUSED_PARAMETER(module);
-  UNUSED_PARAMETER(source);
+  object_function* f = starlark_compile(thread, NULL, source);
+  starlark_bytecode_disassemble(stderr, f->code);
   return STARLARK_RESULT_SUCCESS;
 }

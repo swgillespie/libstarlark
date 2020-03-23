@@ -11,7 +11,7 @@ thread_heap*
 starlark_gc_thread_heap_new(void);
 
 void
-starlark_gc_thread_heap_destroy(thread_heap* heap);
+starlark_gc_thread_heap_free(thread_heap* heap);
 
 object_module*
 starlark_gc_alloc_module(starlark_thread_t* thread);
