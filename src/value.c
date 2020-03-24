@@ -15,6 +15,10 @@ default_trace_pointers(object* ptr, void (*fn)(object**))
   UNUSED_PARAMETER(fn);
 }
 
+// =============================================================================
+// Module
+// =============================================================================
+
 object_vtbl module_vtbl = {
   .size = sizeof(object_module),
   .finalizable = false,
@@ -22,6 +26,10 @@ object_vtbl module_vtbl = {
   .dtor = default_dtor,
   .trace_pointers = default_trace_pointers,
 };
+
+// =============================================================================
+// Function
+// =============================================================================
 
 static void
 function_dtor(object_function* ptr)
@@ -44,6 +52,10 @@ object_vtbl function_vtbl = {
   .trace_pointers = (tracefn)function_trace_pointers,
 };
 
+// =============================================================================
+// String
+// =============================================================================
+
 static void
 string_dtor(object_string* ptr)
 {
@@ -57,3 +69,98 @@ object_vtbl string_vtbl = {
   .contains_pointers = false,
   .trace_pointers = default_trace_pointers,
 };
+
+// =============================================================================
+// Array
+// =============================================================================
+
+static void
+array_trace_pointers(object_array* ptr, void (*fn)(object**))
+{
+  for (size_t i = 0; i < ptr->length; i++) {
+    if (starlark_value_is_object(ptr->data[i])) {
+      fn(AS_OBJ_REF(&ptr->data[i]));
+    }
+  }
+}
+
+object_vtbl array_vtbl = {
+  .size = sizeof(object_array),
+  .finalizable = false,
+  .dtor = default_dtor,
+  .contains_pointers = true,
+  .trace_pointers = (tracefn)array_trace_pointers,
+};
+
+// =============================================================================
+// List
+// =============================================================================
+
+static void
+list_trace_pointers(object_list* ptr, void (*fn)(object**))
+{
+  fn(AS_OBJ_REF(&ptr->data));
+}
+
+object_vtbl list_vtbl = {
+  .size = sizeof(object_list),
+  .finalizable = false,
+  .dtor = default_dtor,
+  .contains_pointers = true,
+  .trace_pointers = (tracefn)list_trace_pointers,
+};
+
+// =============================================================================
+// Tuple
+// =============================================================================
+
+static void
+tuple_trace_pointers(object_tuple* ptr, void (*fn)(object**))
+{
+  fn(AS_OBJ_REF(&ptr->data));
+}
+
+object_vtbl tuple_vtbl = {
+  .size = sizeof(object_tuple),
+  .finalizable = false,
+  .dtor = default_dtor,
+  .contains_pointers = true,
+  .trace_pointers = (tracefn)tuple_trace_pointers,
+};
+
+// =============================================================================
+// Dict
+// =============================================================================
+
+static void
+dict_trace_pointers(object_dict* ptr, void (*fn)(object**))
+{
+  fn(AS_OBJ_REF(&ptr->data));
+  if (ptr->most_recently_added != NULL) {
+    fn(AS_OBJ_REF(&ptr->most_recently_added));
+  }
+}
+
+object_vtbl dict_vtbl = {
+  .size = sizeof(object_dict),
+  .finalizable = false,
+  .dtor = default_dtor,
+  .contains_pointers = true,
+  .trace_pointers = (tracefn)dict_trace_pointers,
+};
+
+/*
+void
+starlark_dict_insert(object_dict* dict, value key, value value)
+{
+  // Entries in the Starlark dictionary are 4-tuples:
+  //   1) The key, in its unhashed form
+  //   2) The value
+  //   3) A linked list entry pointing to the next tuple in the insertion order
+  //
+  // TODO(swgillespie) just a sketch, this is not going to work
+  uint64_t key_hash = starlark_value_hash(key);
+  size_t bucket_id = key_hash % dict->data->length;
+  object_tuple* entry_tuple = (object_tuple*)NULL; // TODO gc.h
+}
+*/

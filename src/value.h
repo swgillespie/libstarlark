@@ -8,7 +8,20 @@
 #include "bytecode.h"
 #include "util.h"
 
-typedef uint64_t value;
+typedef uint_fast64_t value;
+
+static inline bool
+starlark_value_is_object(value v)
+{
+  return (v & 7) == 0;
+}
+
+static inline uint64_t
+starlark_value_hash(value v)
+{
+  UNUSED_PARAMETER(v);
+  return 0;
+}
 
 typedef struct object
 {
@@ -46,9 +59,45 @@ typedef struct object_string
   char* contents;
 } object_string;
 
+typedef struct object_array
+{
+  object root;
+  size_t length;
+  value data[];
+} object_array;
+
+typedef struct object_list
+{
+  object root;
+  size_t count;
+  object_array* data;
+} object_list;
+
+typedef struct object_tuple
+{
+  object root;
+  size_t count;
+  object_array* data;
+} object_tuple;
+
+typedef struct object_dict
+{
+  object root;
+  size_t count;
+  object_array* data;
+  object_tuple* most_recently_added;
+} object_dict;
+
+void
+starlark_dict_insert(object_dict* dict, value key, value value);
+
 extern object_vtbl module_vtbl;
 extern object_vtbl function_vtbl;
 extern object_vtbl string_vtbl;
+extern object_vtbl array_vtbl;
+extern object_vtbl list_vtbl;
+extern object_vtbl tuple_vtbl;
+extern object_vtbl dict_vtbl;
 
 static inline size_t
 starlark_object_size(object* ptr)
@@ -73,6 +122,6 @@ starlark_object_finalize(object* ptr)
 }
 
 #define AS_OBJ(ptr) ((object*)(ptr))
-#define AS_OBJ_REF(ptr) ((object**)(&ptr))
+#define AS_OBJ_REF(ptr) ((object**)(ptr))
 
 #endif // __STARLARK_VALUE_H__
