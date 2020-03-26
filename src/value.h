@@ -12,6 +12,12 @@
 typedef uint_fast64_t value;
 
 static inline bool
+starlark_value_is_int(value v)
+{
+  return (v & 7) == 1;
+}
+
+static inline bool
 starlark_value_is_object(value v)
 {
   return (v & 7) == 0;
@@ -41,14 +47,6 @@ typedef struct object_vtbl
   destructor dtor;
   tracefn trace_pointers;
 } object_vtbl;
-
-typedef struct object_module
-{
-  object root;
-} object_module;
-
-object_module*
-starlark_module_new(starlark_thread_t* thread);
 
 typedef struct object_function
 {
@@ -80,6 +78,9 @@ typedef struct object_list
   object_array* data;
 } object_list;
 
+value
+starlark_list_get_element(object_list* list, int index);
+
 typedef struct object_tuple
 {
   object root;
@@ -97,6 +98,19 @@ typedef struct object_dict
 
 void
 starlark_dict_insert(object_dict* dict, value key, value value);
+
+typedef struct object_module
+{
+  object root;
+  object_string* export_name;
+  value export_value;
+} object_module;
+
+object_module*
+starlark_module_new(starlark_thread_t* thread);
+
+object_module
+starlark_module_add_export(object_string* name, value value);
 
 extern object_vtbl module_vtbl;
 extern object_vtbl function_vtbl;

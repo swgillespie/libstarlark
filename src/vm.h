@@ -11,6 +11,7 @@ struct starlark_thread_t
   starlark_vm_t* vm;
   struct compiler* compiler;
   struct thread_heap* heap;
+  struct object_list* slots;
 };
 
 #endif // __STARLARK_VM_H__

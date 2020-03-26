@@ -28,12 +28,21 @@ starlark_module_new(starlark_thread_t* thread)
   return mod;
 }
 
+void
+module_trace_pointers(object_module* ptr, void (*fn)(object**))
+{
+  fn(AS_OBJ_REF(&ptr->export_name));
+  if (starlark_value_is_object(ptr->export_value)) {
+    fn(AS_OBJ_REF(&ptr->export_value));
+  }
+}
+
 object_vtbl module_vtbl = {
   .size = sizeof(object_module),
   .finalizable = false,
-  .contains_pointers = false,
+  .contains_pointers = true,
   .dtor = default_dtor,
-  .trace_pointers = default_trace_pointers,
+  .trace_pointers = (tracefn)module_trace_pointers,
 };
 
 // =============================================================================
@@ -127,6 +136,14 @@ object_vtbl list_vtbl = {
   .contains_pointers = true,
   .trace_pointers = (tracefn)list_trace_pointers,
 };
+
+value
+starlark_list_get_element(object_list* list, int element)
+{
+  UNUSED_PARAMETER(list);
+  UNUSED_PARAMETER(element);
+  INVARIANT(false && "NYI");
+}
 
 // =============================================================================
 // Tuple
