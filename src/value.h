@@ -124,6 +124,11 @@ static inline size_t
 starlark_object_size(object* ptr)
 {
   INVARIANT(ptr != NULL);
+  if (ptr->vtbl == &array_vtbl) {
+    object_array* arr = (object_array*)ptr;
+    return arr->length;
+  }
+
   return ptr->vtbl->size;
 }
 

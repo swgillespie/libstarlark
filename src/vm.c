@@ -31,6 +31,7 @@ starlark_thread_new(starlark_vm_t* vm)
 
   ctx->vm = vm;
   ctx->heap = starlark_gc_thread_heap_new();
+  ctx->slots = NULL;
   return ctx;
 }
 
@@ -59,7 +60,7 @@ starlark_thread_get_slot_count(starlark_thread_t* thread)
     return 0;
   }
 
-  return thread->slots->count;
+  return thread->slots->length;
 }
 
 static void
@@ -71,17 +72,19 @@ validate_api_slots(starlark_thread_t* thread, starlark_slot_t slot)
 }
 
 void
-starlark_thread_ensure_slots(starlark_thread_t* thread)
+starlark_thread_ensure_slots(starlark_thread_t* thread, int desired_slots)
 {
-  UNUSED_PARAMETER(thread);
-  // TODO(swgillespie)
+  INVARIANT(desired_slots > 0);
+  if (thread->slots == NULL || thread->slots->length < (size_t)desired_slots) {
+    thread->slots = starlark_gc_alloc_array(thread, desired_slots);
+  }
 }
 
 starlark_type_t
 starlark_thread_get_slot_type(starlark_thread_t* thread, starlark_slot_t slot)
 {
   validate_api_slots(thread, slot);
-  value v = starlark_list_get_element(thread->slots, slot);
+  value v = thread->slots->data[slot];
   if (starlark_value_is_int(v)) {
     return STARLARK_TYPE_INT;
   }

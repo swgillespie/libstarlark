@@ -97,8 +97,21 @@ Thread_slot_count(Thread* self, PyObject* Py_UNUSED(args))
   return PyLong_FromLong(slots);
 }
 
+static PyObject*
+Thread_ensure_slots(Thread* self, PyObject* args)
+{
+  int desired_slots = 0;
+  if (!PyArg_ParseTuple(args, "i", &desired_slots)) {
+    return NULL;
+  }
+
+  starlark_thread_ensure_slots(self->thread, desired_slots);
+  Py_RETURN_NONE;
+}
+
 static PyMethodDef Thread_methods[] = {
   { "slot_count", (PyCFunction)Thread_slot_count, METH_NOARGS },
+  { "ensure_slots", (PyCFunction)Thread_ensure_slots, METH_VARARGS },
   { NULL },
 };
 

@@ -18,6 +18,7 @@ class VmTests(unittest.TestCase):
         with self.assertRaises(TypeError):
             starlark.Thread("not a vm")
 
+
 class ThreadTests(unittest.TestCase):
     def setUp(self):
         self.vm = starlark.VirtualMachine()
@@ -25,3 +26,8 @@ class ThreadTests(unittest.TestCase):
     def test_slot_count_starts_at_zero(self):
         thread = starlark.Thread(self.vm)
         self.assertEqual(0, thread.slot_count())
+
+    def test_ensure_slots(self):
+        thread = starlark.Thread(self.vm)
+        thread.ensure_slots(4)
+        self.assertEqual(4, thread.slot_count())

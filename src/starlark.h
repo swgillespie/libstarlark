@@ -41,7 +41,7 @@ int
 starlark_thread_get_slot_count(starlark_thread_t* thread);
 
 void
-starlark_thread_ensure_slots(starlark_thread_t* thread);
+starlark_thread_ensure_slots(starlark_thread_t* thread, int desired_slots);
 
 starlark_type_t
 starlark_thread_get_slot_type(starlark_thread_t* thread, starlark_slot_t slot);

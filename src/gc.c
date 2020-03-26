@@ -30,42 +30,46 @@ align_up(uint8_t* ptr)
   return (uint8_t*)(((size_t)ptr + 7) & ~7);
 }
 
-static bool
-aligned(uint8_t* ptr)
+static object*
+alloc_object(starlark_thread_t* thread, size_t size)
 {
-  return align_up(ptr) == ptr;
+  thread_heap* heap = thread->heap;
+  uint8_t* result_ptr = heap->free;
+  uint8_t* bump = align_up(result_ptr + size);
+  if (bump > heap->top) {
+    INVARIANT(false && "NYI: collect garbage or expand heap");
+  }
+
+  heap->free = bump;
+  memset(result_ptr, 0, size);
+  object* obj = (object*)result_ptr;
+  obj->frozen = false;
+  return obj;
 }
 
 object*
 starlark_gc_alloc_object(starlark_thread_t* thread, object_vtbl* vtbl)
 {
   INVARIANT(thread != NULL);
-  thread_heap* heap = thread->heap;
-
-  INVARIANT(heap != NULL);
+  INVARIANT(thread->heap != NULL);
   INVARIANT(vtbl != NULL);
-  INVARIANT(aligned(heap->free));
-  uint8_t* result_ptr = heap->free;
-  uint8_t* bump = align_up(result_ptr + vtbl->size);
-  if (bump > heap->top) {
-    INVARIANT(false && "NYI: collect garbage or expand heap");
-  }
 
-  heap->free = bump;
-  memset(result_ptr, 0, vtbl->size);
-  object* obj = (object*)result_ptr;
+  object* obj = alloc_object(thread, vtbl->size);
   obj->vtbl = vtbl;
-  obj->frozen = false;
   return obj;
 }
 
 object_array*
 starlark_gc_alloc_array(starlark_thread_t* thread, size_t num_elements)
 {
-  INVARIANT(false && "NYI");
-  UNUSED_PARAMETER(thread);
-  UNUSED_PARAMETER(num_elements);
-  return NULL;
+  INVARIANT(thread != NULL);
+  INVARIANT(thread->heap != NULL);
+  INVARIANT(num_elements != 0);
+  object_array* arr =
+    (object_array*)alloc_object(thread, num_elements * sizeof(value));
+  arr->root.vtbl = &array_vtbl;
+  arr->length = num_elements;
+  return arr;
 }
 
 void
