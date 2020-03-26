@@ -13,7 +13,7 @@ DEFINE_FROZEN_VECTOR(bytecode, bytecode_builder, uint8_t)
 void
 starlark_bytecode_disassemble(FILE* stream, bytecode* code)
 {
-  for (int i = 0; i < code->count; i++) {
-    fprintf(stream, "%d: %s\n", i, mnemonics[code->data[code->count]]);
+  for (size_t i = 0; i < code->count; i++) {
+    fprintf(stream, "%zu: %s\n", i, mnemonics[code->data[code->count]]);
   }
 }

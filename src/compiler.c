@@ -1,5 +1,5 @@
 #include "compiler.h"
-#include "gc.h"
+#include "value.h"
 #include "vm.h"
 
 struct compiler
@@ -16,8 +16,9 @@ compile(compiler* compiler)
 {
   starlark_bytecode_builder_new(&compiler->builder);
   starlark_bytecode_builder_append(&compiler->builder, OP_RETURN);
-  compiler->func = starlark_gc_alloc_function(compiler->thread);
-  starlark_bytecode_new(&compiler->builder, &compiler->func->code);
+  bytecode code;
+  starlark_bytecode_new(&compiler->builder, &code);
+  compiler->func = starlark_function_new(compiler->thread, code);
   return compiler->func;
 }
 

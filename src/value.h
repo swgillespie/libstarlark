@@ -7,6 +7,7 @@
 
 #include "bytecode.h"
 #include "util.h"
+#include "vm.h"
 
 typedef uint_fast64_t value;
 
@@ -46,11 +47,17 @@ typedef struct object_module
   object root;
 } object_module;
 
+object_module*
+starlark_module_new(starlark_thread_t* thread);
+
 typedef struct object_function
 {
   object root;
   bytecode code;
 } object_function;
+
+object_function*
+starlark_function_new(starlark_thread_t* thread, bytecode code);
 
 typedef struct object_string
 {

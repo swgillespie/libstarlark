@@ -1,5 +1,6 @@
 #include "value.h"
 #include "bytecode.h"
+#include "gc.h"
 #include "util.h"
 
 static void
@@ -18,6 +19,14 @@ default_trace_pointers(object* ptr, void (*fn)(object**))
 // =============================================================================
 // Module
 // =============================================================================
+
+object_module*
+starlark_module_new(starlark_thread_t* thread)
+{
+  object_module* mod =
+    (object_module*)starlark_gc_alloc_object(thread, &module_vtbl);
+  return mod;
+}
 
 object_vtbl module_vtbl = {
   .size = sizeof(object_module),
@@ -42,6 +51,15 @@ function_trace_pointers(object_function* ptr, void (*fn)(object**))
 {
   UNUSED_PARAMETER(ptr);
   UNUSED_PARAMETER(fn);
+}
+
+object_function*
+starlark_function_new(starlark_thread_t* thread, bytecode code)
+{
+  object_function* func =
+    (object_function*)starlark_gc_alloc_object(thread, &function_vtbl);
+  func->code = code;
+  return func;
 }
 
 object_vtbl function_vtbl = {
